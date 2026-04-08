@@ -120,16 +120,36 @@ class ScreenerGUI(BoxLayout, News):
     def setup_ui(self):
         #Top panel
         top_layout = BoxLayout(orientation='horizontal', size_hint_y=0.1, spacing=10)    
+        #search field
+        input_field =  GridLayout(cols=2, size_hint_y=1, size_hint_x=0.75)
+        self.search_query = TextInput(
+            multiline=False, 
+            hint_text='NewsScreener',
+            background_color=(0.865,0.865,0.865, 0.1)
+        )
+        input_field.add_widget(self.search_query)
+        top_layout.add_widget(input_field)
+        #search button
+        search_btn = Button(text='Search', size_hint_x=0.15, background_color=(0.094, 0.373, 0.647, 1), background_normal='', color=(0.706, 0.831, 0.957, 1))
+        search_btn.bind(on_press=lambda instance: self.display_content(None, instance))
+        top_layout.add_widget(search_btn)
         #refresh button
         refresh_btn = Button(text='Refresh', size_hint_x=0.15, background_color=(0.094, 0.373, 0.647, 1), background_normal='', color=(0.706, 0.831, 0.957, 1))
         refresh_btn.bind(on_press=lambda instance: self.display_content(self.current_type_of_info, instance))
         top_layout.add_widget(refresh_btn)
+        self.add_widget(top_layout)
+        #content type
+        content_layout = BoxLayout(orientation='horizontal', size_hint_y=0.1, spacing=10)    
+        #Button for all
+        news_btn = Button(text='All', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
+        news_btn.bind(on_press=lambda instance: self.display_content(None, instance))
+        content_layout.add_widget(news_btn)
         #Button for news
-        news_btn = Button(text='News', size_hint_x=0.2)
+        news_btn = Button(text='News', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
         news_btn.bind(on_press=lambda instance: self.display_content('news', instance))
         top_layout.add_widget(news_btn)
         #Blogs
-        blogs_btn = Button(text='Blogs', size_hint_x=0.2)
+        blogs_btn = Button(text='Blogs', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
         blogs_btn.bind(on_press=lambda instance: self.display_content('blogs', instance))
         top_layout.add_widget(blogs_btn)
         self.add_widget(top_layout)
@@ -157,13 +177,25 @@ class ScreenerGUI(BoxLayout, News):
                 dt_element = dt_element.tz_localize('US/Eastern')
         return dt_element.tz_convert('Europe/Berlin').strftime('%Y-%m-%d %H:%M')
 
+    def search_article(self, df):
+        if self.search_query:
+            mask = df['Title'].str.contains(self.search_query.text, case=False, na=False)
+            return df[mask]
+        return df
 
     def display_content(self, content_type, instance):
         self.news_list.clear_widgets()
         self.current_type_of_info = content_type
         try:
             all_infos=self.get_news()
-            info_news=all_infos[content_type]
+            if not content_type: 
+                df_to_process = pd.concat(all_infos.values(), ignore_index=True) #unites all articles
+            else:
+                df_to_process = all_infos[content_type]
+            df_to_process['Date'] = pd.to_datetime(df_to_process['Date'])
+            df_to_process = df_to_process.sort_values(by='Date', ascending=False)
+            
+            info_news = self.search_article(df_to_process)
             for _, item in info_news.iterrows():
                 local_t = self.convert_et_to_local(item.Date)
                 article_date = f"{local_t} (Berlin) | {item.Date} ET"
