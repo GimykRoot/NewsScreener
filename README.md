@@ -10,8 +10,10 @@ Key Features
 4) Minimalistic UI: An interface that doesn't distract from the essence of the data.
 
 Technological aspects
-The project is built on modern Python solutions to ensure speed and cross-platform compatibility:
+The project is built on modern Python (3.11) solutions to ensure speed and cross-platform compatibility:
 
-GUI Framework: Kivy.
+GUI Framework: [Kivy](https://kivy.org/).
 
-Data Sourcing: finvizfinance.
+Data processing:** [pandas](https://pandas.pydata.org/)
+
+Data Sourcing:[finvizfinance](https://pypi.org/project/finvizfinance/)..
