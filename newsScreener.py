@@ -147,12 +147,12 @@ class ScreenerGUI(BoxLayout, News):
         #Button for news
         news_btn = Button(text='News', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
         news_btn.bind(on_press=lambda instance: self.display_content('news', instance))
-        top_layout.add_widget(news_btn)
+        content_layout.add_widget(news_btn)
         #Blogs
         blogs_btn = Button(text='Blogs', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
         blogs_btn.bind(on_press=lambda instance: self.display_content('blogs', instance))
-        top_layout.add_widget(blogs_btn)
-        self.add_widget(top_layout)
+        content_layout.add_widget(blogs_btn)
+        self.add_widget(content_layout)
         
         # Names of labels
         header_layout = BoxLayout(orientation='horizontal', size_hint_y=0.05, spacing=10)
