@@ -307,7 +307,7 @@ class ScreenerGUI(BoxLayout, News):
         scroll_view.add_widget(self.news_list)
         self.add_widget(scroll_view)
 
-        def time_zone_selection_droplist(self, instance):
+    def time_zone_selection_droplist(self, instance):
         dropdown = DropDown()
         dropdown.container.spacing = 5
         for tz_name in self.list_of_available_time_zones.keys():
