@@ -8,6 +8,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
+from kivy.uix.dropdown import DropDown
 from kivy.properties import BooleanProperty, StringProperty
 from kivy.graphics import Color, RoundedRectangle
 
@@ -179,6 +180,16 @@ class ScreenerGUI(BoxLayout, News):
         self.padding = 10
         self.spacing = 10
         self.current_type_of_info = None
+        self.selected_time_zone = 'New York (NYSE)'
+        self.list_of_available_time_zones = {
+            "New York (NYSE)": ("America/New_York", "EST/EDT"),
+            "London (LSE)": ("Europe/London", "GMT/BST"),
+            "Berlin (XETRA)": ("Europe/Berlin", "CET/CEST"),
+            "Tokyo (TSE)": ("Asia/Tokyo", "JST"),
+            "Istanbul (BIST)": ("Europe/Istanbul", "TRT"),
+            "Hong Kong (HKEX)": ("Asia/Hong_Kong", "HKT"),
+            "UTC / GMT": ("UTC", "UTC")
+        }
         self.setup_ui()
 
     def setup_ui(self):
@@ -253,14 +264,16 @@ class ScreenerGUI(BoxLayout, News):
         
         # Names of labels
         header_layout = BoxLayout(orientation='horizontal', size_hint_y=0.05, spacing=10)
-        header_layout.add_widget(
-            Label(
-                text='Date', 
-                size_hint_x=0.10, 
-                bold=True, 
-                color=(0, 0, 0, 1)
-            )
+        time_btn = Button(
+            text='Date', 
+            size_hint_x=0.10, 
+            bold=True, 
+            color=(0, 0, 0, 1),
+            background_normal='', 
+            background_color=(0.7, 0.9, 0.7, 0.1)
         )
+        time_btn.bind(on_press=lambda instance: self.time_zone_selection_droplist(instance))
+        header_layout.add_widget(time_btn)
         header_layout.add_widget(
             Label(
                 text='Title', 
@@ -293,14 +306,36 @@ class ScreenerGUI(BoxLayout, News):
         self.news_list.bind(minimum_height=self.news_list.setter('height'))
         scroll_view.add_widget(self.news_list)
         self.add_widget(scroll_view)
+
+        def time_zone_selection_droplist(self, instance):
+        dropdown = DropDown()
+        dropdown.container.spacing = 5
+        for tz_name in self.list_of_available_time_zones.keys():
+            btn = RoundedButton(
+                text=tz_name, 
+                size_hint_y=None, 
+                height=44,
+                color=(1, 1, 1, 1),
+                background_normal='', 
+                on_press_color = (0.7, 0.9, 0.7, 0.1),
+                background_color=(0.0, 0.4, 0.1, 1)
+            )
+            btn.bind(on_release=lambda btn: dropdown.select(btn.text))
+            dropdown.add_widget(btn)
+        dropdown.bind(on_select=self.apply_time_zone)
+        dropdown.open(instance)
+        
+    def apply_time_zone(self, instance, selected_name):
+        self.selected_time_zone = selected_name
+        self.display_content(self.current_type_of_info, None)
     
-    def convert_et_to_local(self, dt_element):
+    def convert_et_to_selected_time_zone(self, dt_element):
         if isinstance(dt_element, str):
-            dt_element = pd.to_datetime(dt_element)
-        if isinstance(dt_element, pd.Timestamp):
-            if dt_element.tz is None:
-                dt_element = dt_element.tz_localize('US/Eastern')
-        return dt_element.tz_convert('Europe/Berlin').strftime('%Y-%m-%d %H:%M')
+            dt_element = pd.to_datetime(dt_element)  
+        if dt_element.tz is None:
+            dt_element = dt_element.tz_localize('US/Eastern')
+        target_tz = self.list_of_available_time_zones.get(self.selected_time_zone)[0]
+        return dt_element.tz_convert(target_tz).strftime('%Y-%m-%d %H:%M')    
 
     def search_article(self, df):
         if self.search_query:
@@ -322,8 +357,9 @@ class ScreenerGUI(BoxLayout, News):
             
             info_news = self.search_article(df_to_process)
             for _, item in info_news.iterrows():
-                local_t = self.convert_et_to_local(item.Date)
-                article_date = f"{local_t} (Berlin) | {item.Date} ET"
+                local_t = self.convert_et_to_selected_time_zone(item.Date)
+                time_zone_short = self.list_of_available_time_zones[self.selected_time_zone][1]
+                article_date = f"{local_t} {time_zone_short}"
                 article_title = item.Title
                 article_source = self.format_source_name(item.Source)
                 article_link = item.Link
