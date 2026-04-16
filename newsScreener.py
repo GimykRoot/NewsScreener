@@ -2,6 +2,7 @@ from kivy.app import App
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
@@ -20,8 +21,71 @@ class NewsScreenerApp(App):
     def build(self):
         Window.size = (600, 600)
         Window.clearcolor = (0.96, 0.96, 0.97, 1)
-        self.titel = 'ticker Screener'
+        self.titel = 'Article Screener'
         return ScreenerGUI()
+
+class RoundedButton(Button):
+    
+    def __init__(self, on_press_color, **kwargs):
+        self.first_color = kwargs.get('background_color', (0.094, 0.373, 0.647, 1))
+        self.on_press_color = kwargs.pop('on_press_color', (0.07, 0.3, 0.5, 1))
+        self.shape_color = self.first_color
+        kwargs['background_normal'] = ''
+        kwargs['background_down'] = ''
+        kwargs['background_color'] = (0, 0, 0, 0)
+        super(RoundedButton, self).__init__(**kwargs)
+        self.bind(pos=self.update_canvas, size=self.update_canvas)
+        
+
+    def update_canvas(self, *args):
+        self.canvas.before.clear()
+        with self.canvas.before:
+            Color(*self.shape_color)
+            RoundedRectangle(
+                pos=self.pos, 
+                size=self.size, 
+                radius=[20,] 
+            )
+            
+    def on_press(self):
+        self.shape_color = self.on_press_color
+        self.update_canvas()
+
+    def on_release(self):
+        self.shape_color = self.first_color
+        self.update_canvas()
+
+class RoundedToggleButton(ToggleButton):
+    
+    def __init__(self, on_press_color, **kwargs):
+        self.first_color = kwargs.get('background_color', (0.094, 0.373, 0.647, 1))
+        self.on_press_color = kwargs.pop('on_press_color', (0.7, 0.3, 0.5, 1))
+        self.shape_color = self.first_color
+        kwargs['background_normal'] = ''
+        kwargs['background_down'] = ''
+        kwargs['background_color'] = (0, 0, 0, 0)
+        super(RoundedToggleButton, self).__init__(**kwargs)
+        self.bind(pos=self.update_canvas, size=self.update_canvas, state=self.update_canvas)
+        
+    def update_canvas(self, *args):
+        if self.state == 'down':
+            self.shape_color = self.on_press_color
+        else:
+            self.shape_color = self.first_color
+
+        self.canvas.before.clear()
+        with self.canvas.before:
+            Color(*self.shape_color)
+            RoundedRectangle(
+                pos=self.pos, 
+                size=self.size, 
+                radius=[20,]
+            )
+            
+    def on_press(self): #this will avoid the unselection of the button(at least one button will be selected)
+        if self.state == 'normal' and self.group:
+            self.state = 'down'
+        self.update_canvas()
 
 class ArticleListItem(BoxLayout):      #widget for every file
     selected = BooleanProperty(False)
@@ -119,7 +183,7 @@ class ScreenerGUI(BoxLayout, News):
 
     def setup_ui(self):
         #Top panel
-        top_layout = BoxLayout(orientation='horizontal', size_hint_y=0.1, spacing=10)    
+        top_layout = BoxLayout(orientation='horizontal', size_hint_y=0.05, spacing=10)    
         #search field
         input_field =  GridLayout(cols=2, size_hint_y=1, size_hint_x=0.75)
         self.search_query = TextInput(
@@ -130,36 +194,97 @@ class ScreenerGUI(BoxLayout, News):
         input_field.add_widget(self.search_query)
         top_layout.add_widget(input_field)
         #search button
-        search_btn = Button(text='Search', size_hint_x=0.15, background_color=(0.094, 0.373, 0.647, 1), background_normal='', color=(0.706, 0.831, 0.957, 1))
+        search_btn = RoundedButton(
+            text='Search', 
+            size_hint_x=0.15, 
+            on_press_color = (0.094, 0.373, 0.647, 0.07),
+            background_color=(0.094, 0.373, 0.647, 1), 
+            color=(0.706, 0.831, 0.957, 1)
+        )
         search_btn.bind(on_press=lambda instance: self.display_content(None, instance))
         top_layout.add_widget(search_btn)
         #refresh button
-        refresh_btn = Button(text='Refresh', size_hint_x=0.15, background_color=(0.094, 0.373, 0.647, 1), background_normal='', color=(0.706, 0.831, 0.957, 1))
+        refresh_btn = RoundedButton(
+            text='Refresh', 
+            size_hint_x=0.15, 
+            on_press_color = (0.094, 0.373, 0.647, 0.07),
+            background_color=(0.094, 0.373, 0.647, 1), 
+            color=(0.706, 0.831, 0.957, 1)
+        )
         refresh_btn.bind(on_press=lambda instance: self.display_content(self.current_type_of_info, instance))
         top_layout.add_widget(refresh_btn)
         self.add_widget(top_layout)
         #content type
         content_layout = BoxLayout(orientation='horizontal', size_hint_y=0.1, spacing=10)    
         #Button for all
-        news_btn = Button(text='All', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
+        news_btn = RoundedToggleButton(
+            text='All', 
+            group='categories',
+            size_hint_x=0.2, 
+            on_press_color = (0.7, 0.3, 0.5, 1),
+            background_color=(0.094, 0.373, 0.647, 0.07),
+            color=(0, 0, 0, 1)
+        )
         news_btn.bind(on_press=lambda instance: self.display_content(None, instance))
         content_layout.add_widget(news_btn)
         #Button for news
-        news_btn = Button(text='News', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
+        news_btn = RoundedToggleButton(
+            text='News', 
+            group='categories',
+            size_hint_x=0.2, 
+            on_press_color = (0.7, 0.3, 0.5, 1),
+            background_color=(0.094, 0.373, 0.647, 0.07),
+            color=(0, 0, 0, 1)
+        )
         news_btn.bind(on_press=lambda instance: self.display_content('news', instance))
         content_layout.add_widget(news_btn)
         #Blogs
-        blogs_btn = Button(text='Blogs', size_hint_x=0.2, background_color=(0.094, 0.373, 0.647, 0.07),background_normal='', color=(0, 0, 0, 1))
+        blogs_btn = RoundedToggleButton(
+            text='Blogs',
+            group='categories',
+            size_hint_x=0.2, 
+            on_press_color = (0.7, 0.3, 0.5, 1),
+            background_color=(0.094, 0.373, 0.647, 0.07),
+            color=(0, 0, 0, 1)
+        )
         blogs_btn.bind(on_press=lambda instance: self.display_content('blogs', instance))
         content_layout.add_widget(blogs_btn)
         self.add_widget(content_layout)
         
         # Names of labels
         header_layout = BoxLayout(orientation='horizontal', size_hint_y=0.05, spacing=10)
-        header_layout.add_widget(Label(text='Date', size_hint_x=0.10, bold=True, color=(0, 0, 0, 1)))
-        header_layout.add_widget(Label(text='Title', size_hint_x=0.35, bold=True, color=(0, 0, 0, 1)))
-        header_layout.add_widget(Label(text='Source', size_hint_x=0.10, bold=True, color=(0, 0, 0, 1)))
-        header_layout.add_widget(Label(text='Link', size_hint_x=0.45, bold=True, color=(0, 0, 0, 1)))
+        header_layout.add_widget(
+            Label(
+                text='Date', 
+                size_hint_x=0.10, 
+                bold=True, 
+                color=(0, 0, 0, 1)
+            )
+        )
+        header_layout.add_widget(
+            Label(
+                text='Title', 
+                size_hint_x=0.35, 
+                bold=True, 
+                color=(0, 0, 0, 1)
+            )
+        )
+        header_layout.add_widget(
+            Label(
+                text='Source', 
+                size_hint_x=0.10, 
+                bold=True, 
+                color=(0, 0, 0, 1)
+            )
+        )
+        header_layout.add_widget(
+            Label(
+                text='Link', 
+                size_hint_x=0.45, 
+                bold=True, 
+                color=(0, 0, 0, 1)
+            )
+        )
         
         self.add_widget(header_layout)
         # Scroll of files
@@ -217,9 +342,7 @@ class ScreenerGUI(BoxLayout, News):
             
     def open_link(self, link):
         webbrowser.open(link)
-        
-    
-        
+
     def show_error(self, message):
         #Error return
         popup = Popup(
