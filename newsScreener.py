@@ -325,7 +325,7 @@ class ScreenerGUI(BoxLayout, News):
                 local_t = self.convert_et_to_local(item.Date)
                 article_date = f"{local_t} (Berlin) | {item.Date} ET"
                 article_title = item.Title
-                article_source = item.Source
+                article_source = self.format_source_name(item.Source)
                 article_link = item.Link
 
                 article_item = ArticleListItem(
@@ -342,7 +342,38 @@ class ScreenerGUI(BoxLayout, News):
             
     def open_link(self, link):
         webbrowser.open(link)
-
+        
+    def format_source_name(self, url):
+        famous_sources = {
+            'www.bloomberg.com': 'Bloomberg',
+            'www.zerohedge.com': 'ZeroHedge',
+            'www.reuters.com': 'Reuters',
+            'www.wsj.com': 'Wall Street Journal',
+            'www.capitalspectator.com': 'Capital Spectator',
+            'www.nytimes.com': 'The New York Times',
+            'www.markets.fallondpicks.com': 'Fallon Picks',
+            'www.foxbusiness.com': 'Fox Business',
+            'www.marketwatch.com': 'MarketWatch',
+            'finance.yahoo.com': 'Yahoo Finance',
+            'www.cnbc.com': 'CNBC',
+            'realinvestmentadvice.com': 'Real Investment Advice',
+            'mishtalk.com': 'MishTalk',
+            'www.bbc.com': 'BBC News',
+            'seekingalpha.com': 'Seeking Alpha',
+            'abnormalreturns.com': 'Abnormal Returns',
+            'www.howardlindzon.com': 'Howard Lindzon',
+            'dailyreckoning.com': 'Daily Reckoning',
+            'ritholtz.com': 'The Big Picture (Ritholtz)',
+            'traderfeed.blogspot.com': 'TraderFeed'
+        }
+        name = famous_sources.get(url)
+    
+        if name:
+            return name
+        clean_url = url.replace("https://", "").replace("http://", "").replace("www.", "").split('/')[0]
+        name = clean_url.split('.')[0].capitalize()
+        return name
+        
     def show_error(self, message):
         #Error return
         popup = Popup(
