@@ -2,18 +2,24 @@
 ![Preview](Picture/main_frame.png)
 NewsScreener is a lightweight desktop app for aggregating financial and geopolitical news in real time. It's designed for traders, analysts, and anyone who needs a clear picture of the market without unnecessary visual clutter.
 
-Key Features
+## Key Features
 
-1) Instant Monitoring: Collects fresh headlines from key financial sources (Bloomberg, Yahoo Finance, WSJ, MarketWatch, etc.).
-2) Separate Streams: Separate tabs for official news (News) and editorial analysis (Blogs).
-3) Direct Links: Quickly jump to the full text of an article with one click.
-4) Minimalistic UI: An interface that doesn't distract from the essence of the data.
+1) **Instant Monitoring:** Collects fresh headlines from key financial sources (Bloomberg, Yahoo Finance, WSJ, MarketWatch, etc.).
+2) **Separate Streams:** Separate tabs for official news (News) and editorial analysis (Blogs).
+3) **Time Zone Management:** Easily switch time zones so publication times are displayed in the user's preferred time zone.
+4) **Direct Links:** Quickly jump to the full text of an article with one click.
+5) **Minimalistic UI:** An interface that doesn't distract from the essence of the data.
 
-Technological aspects
+## Technological aspects
 The project is built on modern Python (3.11) solutions to ensure speed and cross-platform compatibility:
 
-GUI Framework: [Kivy](https://kivy.org/).
+* **GUI Framework:** [Kivy](https://kivy.org/).
 
-Data processing: [pandas](https://pandas.pydata.org/).
+* **Data processing:** [pandas](https://pandas.pydata.org/).
 
-Data Sourcing:[finvizfinance](https://pypi.org/project/finvizfinance/).
+* **Data Sourcing:** [finvizfinance](https://pypi.org/project/finvizfinance/).
+
+## Time Zone Settings
+
+For a Time Zone switch, simply click on the **Date** section title, and a list of available regions will appear. For a minimalist look, only the most popular regions were used.
+![Preview](Picture/time_zone_selection.png)
