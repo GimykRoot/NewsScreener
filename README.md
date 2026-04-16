@@ -14,6 +14,6 @@ The project is built on modern Python (3.11) solutions to ensure speed and cross
 
 GUI Framework: [Kivy](https://kivy.org/).
 
-Data processing:** [pandas](https://pandas.pydata.org/)
+Data processing: [pandas](https://pandas.pydata.org/).
 
-Data Sourcing:[finvizfinance](https://pypi.org/project/finvizfinance/)..
+Data Sourcing:[finvizfinance](https://pypi.org/project/finvizfinance/).
